@@ -12,6 +12,8 @@ This repository contains:
 
 - `docs/ai-dress-guide-architecture.md`: full architecture design
 - `docs/dressguide.html`: interactive prototype HTML
+- `.env.example`: environment variable template
+- `CONTRIBUTING.md`: contribution workflow and guardrails
 
 ## Core Goals
 
@@ -19,6 +21,12 @@ This repository contains:
 - Keep outfit choices temperature-appropriate
 - Consider color and style matching
 - Support wardrobe management and recommendation history
+
+## Project Conventions
+
+- Copy `.env.example` to your local env file before running services
+- Follow branch naming and commit conventions in `CONTRIBUTING.md`
+- Do not commit real secrets
 
 ## Status
 

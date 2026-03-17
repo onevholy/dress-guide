@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>今日穿什么 · 小程序原型</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #1aab7a;
+    --green-light: #e8f8f2;
+    --green-mid: #0d8a61;
+    --amber: #f5a623;
+    --amber-light: #fff8ec;
+    --blue: #4a90d9;
+    --blue-light: #edf4fc;
+    --red: #e85d5d;
+    --text-primary: #1a1a1a;
+    --text-secondary: #666;
+    --text-tertiary: #aaa;
+    --bg: #f5f4f0;
+    --bg-card: #ffffff;
+    --border: rgba(0,0,0,0.08);
+    --shadow: 0 2px 16px rgba(0,0,0,0.07);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --tab-h: 64px;
+    --bar-h: 44px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans SC', sans-serif;
+    background: #e8e6de;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px 60px;
+  }
+
+  /* ── Header ── */
+  .site-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .site-header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+  }
+  .site-header p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 6px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── Page selector ── */
+  .page-nav {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 40px;
+  }
+  .page-nav button {
+    padding: 8px 18px;
+    border-radius: 100px;
+    border: 1.5px solid var(--border);
+    background: var(--bg-card);
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all .2s ease;
+  }
+  .page-nav button:hover { border-color: var(--green); color: var(--green); }
+  .page-nav button.active {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
+    font-weight: 500;
+  }
+
+  /* ── Phone shell ── */
+  .phone-stage {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .phone-wrapper { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .phone-label {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .phone {
+    width: 375px;
+    height: 812px;
+    border-radius: 52px;
+    background: #1a1a1a;
+    padding: 10px;
+    box-shadow: 0 0 0 1px #2a2a2a, var(--shadow-lg), inset 0 0 0 1px #333;
+    position: relative;
+    overflow: hidden;
+  }
+  .phone-screen {
+    width: 100%;
+    height: 100%;
+    border-radius: 44px;
+    overflow: hidden;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  /* Notch */
+  .notch {
+    position: absolute;
+    top: 0; left: 50%; transform: translateX(-50%);
+    width: 120px; height: 30px;
+    background: #1a1a1a;
+    border-radius: 0 0 18px 18px;
+    z-index: 100;
+  }
+
+  /* Status bar */
+  .status-bar {
+    height: 44px;
+    padding: 14px 20px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .status-bar span { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+  .status-icons { display: flex; gap: 4px; align-items: center; }
+  .status-icons i { font-style: normal; font-size: 12px; }
+
+  /* Nav bar */
+  .nav-bar {
+    height: var(--bar-h);
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    position: relative;
+  }
+  .nav-title { font-size: 17px; font-weight: 600; color: var(--text-primary); flex: 1; text-align: center; }
+  .nav-back {
+    font-size: 14px; color: var(--green); cursor: pointer;
+    display: flex; align-items: center; gap: 2px;
+  }
+  .nav-right { width: 60px; display: flex; justify-content: flex-end; }
+
+  /* Scroll body */
+  .page-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .page-body::-webkit-scrollbar { display: none; }
+
+  /* Tab bar */
+  .tab-bar {
+    height: var(--tab-h);
+    background: var(--bg-card);
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-shrink: 0;
+    padding-bottom: 8px;
+  }
+  .tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    cursor: pointer;
+    transition: opacity .15s;
+  }
+  .tab-item:hover { opacity: .7; }
+  .tab-icon {
+    width: 26px; height: 26px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tab-icon svg { width: 22px; height: 22px; }
+  .tab-label { font-size: 10px; color: var(--text-tertiary); }
+  .tab-item.active .tab-label { color: var(--green); }
+  .tab-item.active .tab-icon svg { stroke: var(--green); fill: none; }
+  .tab-item:not(.active) .tab-icon svg { stroke: var(--text-tertiary); fill: none; }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow);
+  }
+  .card-sm { border-radius: var(--radius-sm); padding: 12px; }
+
+  /* ── Weather Card ── */
+  .weather-card {
+    background: linear-gradient(135deg, #1aab7a 0%, #0d8a61 100%);
+    border-radius: var(--radius);
+    padding: 20px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .weather-card::before {
+    content: '';
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+  }
+  .weather-card::after {
+    content: '';
+    position: absolute;
+    bottom: -20px; right: 30px;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+  }
+  .weather-location { font-size: 12px; opacity: .75; margin-bottom: 8px; display: flex; align-items: center; gap: 4px; }
+  .weather-main { display: flex; align-items: flex-end; gap: 16px; }
+  .weather-temp { font-size: 64px; font-weight: 300; line-height: 1; letter-spacing: -3px; }
+  .weather-desc { padding-bottom: 6px; }
+  .weather-desc .condition { font-size: 18px; font-weight: 500; }
+  .weather-desc .feel { font-size: 12px; opacity: .8; margin-top: 2px; }
+  .weather-detail { display: flex; gap: 12px; margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.2); }
+  .weather-detail-item { font-size: 12px; opacity: .85; }
+  .weather-detail-item b { display: block; font-size: 15px; font-weight: 500; opacity: 1; }
+  .hourly-strip { display: flex; gap: 10px; margin-top: 12px; overflow-x: auto; }
+  .hourly-strip::-webkit-scrollbar { display: none; }
+  .hourly-item { flex-shrink: 0; text-align: center; background: rgba(255,255,255,0.12); border-radius: 20px; padding: 8px 10px; font-size: 11px; }
+  .hourly-item .h-time { opacity: .75; margin-bottom: 4px; }
+  .hourly-item .h-temp { font-weight: 500; font-size: 14px; }
+
+  /* ── Outfit Card ── */
+  .outfit-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .outfit-header h3 { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+  .outfit-header span { font-size: 12px; color: var(--green); cursor: pointer; }
+  .outfit-visual {
+    width: 100%; height: 180px;
+    border-radius: var(--radius-sm);
+    background: linear-gradient(160deg, #f0ede5 0%, #e8e4da 100%);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px; position: relative; overflow: hidden;
+  }
+  .outfit-figure {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .outfit-top {
+    width: 72px; height: 62px; border-radius: 8px 8px 4px 4px;
+    background: #fff; border: 1px solid rgba(0,0,0,.08);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; color: var(--text-tertiary); position: relative;
+  }
+  .outfit-top::before { content: '上衣'; font-size: 10px; color: var(--text-tertiary); }
+  .outfit-bottom {
+    width: 72px; height: 80px; border-radius: 4px 4px 8px 8px;
+    background: #2c3e50; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; color: rgba(255,255,255,.5);
+  }
+  .outfit-bottom::before { content: '下装'; }
+  .outfit-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .tag {
+    padding: 4px 10px; border-radius: 100px;
+    font-size: 11px; font-weight: 500;
+  }
+  .tag-green { background: var(--green-light); color: var(--green-mid); }
+  .tag-amber { background: var(--amber-light); color: #c47d0a; }
+  .tag-blue { background: var(--blue-light); color: #2a6aaa; }
+  .outfit-items { display: flex; flex-direction: column; gap: 8px; }
+  .outfit-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px; background: var(--bg); border-radius: 8px;
+  }
+  .outfit-item-color { width: 32px; height: 32px; border-radius: 6px; flex-shrink: 0; }
+  .outfit-item-info { flex: 1; }
+  .outfit-item-name { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+  .outfit-item-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 1px; }
+
+  /* ── Section header ── */
+  .section-hd { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .section-hd h3 { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+  .section-hd a { font-size: 12px; color: var(--green); text-decoration: none; }
+
+  /* ── Filter chips ── */
+  .filter-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+  .filter-row::-webkit-scrollbar { display: none; }
+  .chip {
+    flex-shrink: 0; padding: 6px 14px; border-radius: 100px;
+    font-size: 12px; font-weight: 500; cursor: pointer;
+    border: 1.5px solid var(--border);
+    background: var(--bg-card); color: var(--text-secondary);
+    transition: all .15s;
+  }
+  .chip.active { background: var(--green); border-color: var(--green); color: #fff; }
+
+  /* ── Clothes Grid ── */
+  .clothes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .cloth-card {
+    background: var(--bg-card); border-radius: var(--radius-sm);
+    overflow: hidden; box-shadow: var(--shadow); cursor: pointer;
+    transition: transform .15s; position: relative;
+  }
+  .cloth-card:hover { transform: scale(1.02); }
+  .cloth-thumb {
+    width: 100%; aspect-ratio: 3/4;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; position: relative;
+  }
+  .cloth-badge {
+    position: absolute; top: 8px; left: 8px;
+    background: rgba(0,0,0,0.45); color: #fff;
+    font-size: 9px; padding: 2px 6px; border-radius: 4px;
+  }
+  .cloth-info { padding: 8px 10px; }
+  .cloth-name { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+  .cloth-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+  .cloth-add {
+    background: var(--bg); border: 2px dashed var(--border);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 6px; aspect-ratio: 3/4; border-radius: var(--radius-sm); cursor: pointer;
+    transition: border-color .15s;
+  }
+  .cloth-add:hover { border-color: var(--green); }
+  .cloth-add-icon { font-size: 28px; color: var(--text-tertiary); }
+  .cloth-add span { font-size: 12px; color: var(--text-tertiary); }
+
+  /* ── Add form ── */
+  .upload-zone {
+    width: 100%; height: 140px;
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-sm);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 8px;
+    background: var(--bg-card); cursor: pointer;
+    transition: border-color .15s;
+  }
+  .upload-zone:hover { border-color: var(--green); }
+  .upload-zone .upload-icon { font-size: 36px; }
+  .upload-zone span { font-size: 13px; color: var(--text-tertiary); }
+  .upload-zone small { font-size: 11px; color: var(--text-tertiary); }
+
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-label { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+  .form-select {
+    background: var(--bg); border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px 14px;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 14px; color: var(--text-primary); appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%23aaa' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center;
+  }
+  .color-palette { display: flex; gap: 8px; flex-wrap: wrap; }
+  .color-dot {
+    width: 36px; height: 36px; border-radius: 50%; cursor: pointer;
+    border: 2.5px solid transparent; transition: transform .15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .color-dot:hover { transform: scale(1.1); }
+  .color-dot.active { border-color: var(--green); }
+  .color-dot.active::after { content: '✓'; font-size: 14px; color: rgba(255,255,255,0.9); font-weight: 700; }
+  .multi-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .multi-chip {
+    padding: 7px 14px; border-radius: 100px; font-size: 12px; font-weight: 500;
+    border: 1.5px solid var(--border); background: var(--bg-card);
+    color: var(--text-secondary); cursor: pointer; transition: all .15s;
+  }
+  .multi-chip.active { background: var(--green-light); border-color: var(--green); color: var(--green-mid); }
+  .btn-primary {
+    width: 100%; padding: 14px;
+    background: var(--green); color: #fff; border: none;
+    border-radius: var(--radius-sm); font-family: 'Noto Sans SC', sans-serif;
+    font-size: 15px; font-weight: 500; cursor: pointer;
+    transition: background .15s; margin-top: 4px;
+  }
+  .btn-primary:hover { background: var(--green-mid); }
+  .btn-secondary {
+    width: 100%; padding: 12px;
+    background: transparent; color: var(--green); border: 1.5px solid var(--green);
+    border-radius: var(--radius-sm); font-family: 'Noto Sans SC', sans-serif;
+    font-size: 14px; font-weight: 500; cursor: pointer; transition: all .15s;
+  }
+  .btn-secondary:hover { background: var(--green-light); }
+
+  /* ── History ── */
+  .calendar-card { padding: 16px; }
+  .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .cal-header h3 { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+  .cal-nav { display: flex; gap: 12px; }
+  .cal-nav span { font-size: 18px; color: var(--text-secondary); cursor: pointer; padding: 0 4px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+  .cal-dow { font-size: 11px; color: var(--text-tertiary); text-align: center; padding: 4px 0; }
+  .cal-day {
+    aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+    font-size: 13px; color: var(--text-primary); border-radius: 50%; cursor: pointer;
+    position: relative;
+  }
+  .cal-day:hover { background: var(--bg); }
+  .cal-day.today { background: var(--green); color: #fff; font-weight: 600; }
+  .cal-day.has-record::after {
+    content: ''; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
+    width: 4px; height: 4px; border-radius: 50%; background: var(--green);
+  }
+  .cal-day.today::after { background: rgba(255,255,255,.7); }
+  .cal-day.dimmed { color: var(--text-tertiary); }
+
+  .history-list { display: flex; flex-direction: column; gap: 8px; }
+  .history-item {
+    background: var(--bg-card); border-radius: var(--radius-sm);
+    padding: 12px; display: flex; align-items: center; gap: 12px;
+    box-shadow: var(--shadow); cursor: pointer; transition: transform .15s;
+  }
+  .history-item:hover { transform: translateX(3px); }
+  .history-thumb {
+    width: 52px; height: 68px; border-radius: 8px;
+    background: var(--bg); flex-shrink: 0; overflow: hidden;
+    display: flex; align-items: center; justify-content: center; font-size: 24px;
+  }
+  .history-info { flex: 1; }
+  .history-date { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; }
+  .history-pieces { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 4px; }
+  .history-piece { font-size: 11px; color: var(--text-secondary); background: var(--bg); padding: 2px 7px; border-radius: 4px; }
+  .history-weather { font-size: 11px; color: var(--text-tertiary); display: flex; align-items: center; gap: 3px; }
+  .history-arrow { font-size: 16px; color: var(--text-tertiary); }
+
+  /* ── Detail page ── */
+  .detail-hero {
+    width: 100%; height: 260px;
+    background: linear-gradient(160deg, #f5f2ea, #e8e3d8);
+    border-radius: var(--radius); overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .detail-figure { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .detail-top {
+    width: 90px; height: 80px; border-radius: 10px 10px 5px 5px;
+    background: #fff; border: 1px solid rgba(0,0,0,.08);
+    display: flex; align-items: center; justify-content: center; font-size: 28px;
+  }
+  .detail-bottom {
+    width: 90px; height: 100px; border-radius: 5px 5px 10px 10px;
+    background: #2c3e50; display: flex; align-items: center; justify-content: center; font-size: 24px;
+  }
+  .detail-weather-badge {
+    position: absolute; top: 14px; right: 14px;
+    background: rgba(255,255,255,0.85); border-radius: 12px;
+    padding: 6px 10px; font-size: 12px; color: var(--text-primary);
+    display: flex; align-items: center; gap: 4px; font-weight: 500;
+  }
+  .stat-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .stat-box { background: var(--bg); border-radius: var(--radius-sm); padding: 10px; text-align: center; }
+  .stat-box .sv { font-size: 18px; font-weight: 600; color: var(--text-primary); }
+  .stat-box .sl { font-size: 10px; color: var(--text-tertiary); margin-top: 2px; }
+  .items-list { display: flex; flex-direction: column; gap: 8px; }
+  .item-row {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--bg); border-radius: var(--radius-sm); padding: 10px 12px;
+  }
+  .item-swatch { width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; }
+  .item-detail { flex: 1; }
+  .item-detail .in { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+  .item-detail .is { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+
+  /* ── Page transitions ── */
+  .page-screen {
+    display: none;
+    width: 100%; height: 100%;
+    flex-direction: column;
+    animation: fadeIn .25s ease;
+  }
+  .page-screen.active { display: flex; }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: translateY(0); } }
+
+  /* ── Responsive ── */
+  @media (max-width: 500px) {
+    .phone { width: 100%; max-width: 375px; height: 812px; }
+    .site-header h1 { font-size: 24px; }
+  }
+
+  /* ── Page labels under phone ── */
+  .page-indicator {
+    display: flex; gap: 8px; justify-content: center; align-items: center;
+    font-size: 12px; color: var(--text-tertiary);
+  }
+  .page-indicator span.dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--border);
+  }
+  .page-indicator span.dot.active { background: var(--green); }
+</style>
+</head>
+<body>
+
+<div class="site-header">
+  <h1>今日穿什么</h1>
+  <p>微信小程序 · 交互原型 · 5个页面</p>
+</div>
+
+<nav class="page-nav">
+  <button class="active" onclick="showPage('home', this)">① 首页</button>
+  <button onclick="showPage('wardrobe', this)">② 我的衣柜</button>
+  <button onclick="showPage('add', this)">③ 添加衣服</button>
+  <button onclick="showPage('history', this)">④ 历史穿搭</button>
+  <button onclick="showPage('detail', this)">⑤ 穿搭详情</button>
+</nav>
+
+<div class="phone-stage">
+  <div class="phone-wrapper">
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="phone-screen">
+
+        <!-- ① 首页 -->
+        <div class="page-screen active" id="page-home">
+          <div class="status-bar">
+            <span>9:41</span>
+            <div class="status-icons">
+              <i>●●●</i>&nbsp;<i>WiFi</i>&nbsp;<i>🔋</i>
+            </div>
+          </div>
+          <div class="nav-bar">
+            <div style="width:60px"></div>
+            <div class="nav-title">今日穿什么</div>
+            <div class="nav-right">
+              <span style="font-size:20px;cursor:pointer">⚙️</span>
+            </div>
+          </div>
+          <div class="page-body">
+
+            <!-- 天气 -->
+            <div class="weather-card">
+              <div class="weather-location">📍 北京市 朝阳区</div>
+              <div class="weather-main">
+                <div class="weather-temp">18°</div>
+                <div class="weather-desc">
+                  <div class="condition">多云转晴</div>
+                  <div class="feel">体感 16° · 湿度 55%</div>
+                </div>
+              </div>
+              <div class="weather-detail">
+                <div class="weather-detail-item"><b>↑ 22°</b>最高</div>
+                <div class="weather-detail-item"><b>↓ 10°</b>最低</div>
+                <div class="weather-detail-item"><b>3级</b>北风</div>
+                <div class="weather-detail-item"><b>优</b>空气</div>
+              </div>
+              <div class="hourly-strip">
+                <div class="hourly-item"><div class="h-time">现在</div><div>⛅</div><div class="h-temp">18°</div></div>
+                <div class="hourly-item"><div class="h-time">12时</div><div>☀️</div><div class="h-temp">21°</div></div>
+                <div class="hourly-item"><div class="h-time">15时</div><div>☀️</div><div class="h-temp">22°</div></div>
+                <div class="hourly-item"><div class="h-time">18时</div><div>🌤</div><div class="h-temp">17°</div></div>
+                <div class="hourly-item"><div class="h-time">21时</div><div>🌙</div><div class="h-temp">12°</div></div>
+              </div>
+            </div>
+
+            <!-- 穿搭推荐 -->
+            <div class="card">
+              <div class="outfit-header">
+                <h3>✨ 今日穿搭推荐</h3>
+                <span onclick="showPage('detail', document.querySelector('.page-nav button:nth-child(5)'))">查看详情 ›</span>
+              </div>
+              <div class="outfit-visual">
+                <div class="outfit-figure">
+                  <div class="outfit-top"></div>
+                  <div class="outfit-bottom"></div>
+                </div>
+              </div>
+              <div class="outfit-tags">
+                <span class="tag tag-green">🌿 春日清爽</span>
+                <span class="tag tag-amber">👔 通勤风</span>
+                <span class="tag tag-blue">🌡 适合18°</span>
+              </div>
+              <div class="outfit-items">
+                <div class="outfit-item">
+                  <div class="outfit-item-color" style="background:#f5f0e8;border:1px solid #eee"></div>
+                  <div class="outfit-item-info">
+                    <div class="outfit-item-name">米白色轻薄衬衫</div>
+                    <div class="outfit-item-sub">上衣 · 春秋 · 通勤</div>
+                  </div>
+                  <span style="font-size:11px;color:var(--green)">已选</span>
+                </div>
+                <div class="outfit-item">
+                  <div class="outfit-item-color" style="background:#2c3e50"></div>
+                  <div class="outfit-item-info">
+                    <div class="outfit-item-name">深蓝直筒牛仔裤</div>
+                    <div class="outfit-item-sub">裤装 · 四季 · 休闲</div>
+                  </div>
+                  <span style="font-size:11px;color:var(--green)">已选</span>
+                </div>
+                <div class="outfit-item">
+                  <div class="outfit-item-color" style="background:#8B7355"></div>
+                  <div class="outfit-item-info">
+                    <div class="outfit-item-name">棕色小白鞋</div>
+                    <div class="outfit-item-sub">鞋履 · 四季 · 百搭</div>
+                  </div>
+                  <span style="font-size:11px;color:var(--green)">已选</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 换一套 -->
+            <button class="btn-secondary">🔄 换一套搭配</button>
+
+            <!-- AI建议 -->
+            <div class="card" style="background:var(--green-light)">
+              <div style="font-size:12px;font-weight:600;color:var(--green-mid);margin-bottom:6px">💡 穿搭建议</div>
+              <div style="font-size:13px;color:#2d7a5f;line-height:1.6">
+                今日温差较大，早晚需注意保暖。推荐在包包里备一件薄外套，避免晚间着凉。整体搭配清爽适合今日多云天气。
+              </div>
+            </div>
+
+          </div>
+          <div class="tab-bar">
+            <div class="tab-item active" onclick="showPage('home', document.querySelectorAll('.page-nav button')[0])">
+              <div class="tab-icon"><svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></div>
+              <div class="tab-label" style="color:var(--green)">首页</div>
+            </div>
+            <div class="tab-item" onclick="showPage('wardrobe', document.querySelectorAll('.page-nav button')[1])">
+              <div class="tab-icon"><svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+              <div class="tab-label">衣柜</div>
+            </div>
+            <div class="tab-item" onclick="showPage('history', document.querySelectorAll('.page-nav button')[3])">
+              <div class="tab-icon"><svg viewBox="0 0 24 24" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+              <div class="tab-label">历史</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ② 我的衣柜 -->
+        <div class="page-screen" id="page-wardrobe">
+          <div class="status-bar"><span>9:41</span><div class="status-icons"><i>●●● 🔋</i></div></div>
+          <div class="nav-bar">
+            <div style="width:60px"></div>
+            <div class="nav-title">我的衣柜</div>
+            <div class="nav-right">
+              <span style="font-size:22px;cursor:pointer;color:var(--green)" onclick="showPage('add', document.querySelectorAll('.page-nav button')[2])">＋</span>
+            </div>
+          </div>
+          <div class="page-body">
+
+            <!-- 统计 -->
+            <div class="stat-row">
+              <div class="stat-box"><div class="sv">24</div><div class="sl">件衣服</div></div>
+              <div class="stat-box"><div class="sv">8</div><div class="sl">套搭配</div></div>
+              <div class="stat-box"><div class="sv">5</div><div class="sl">种风格</div></div>
+            </div>
+
+            <!-- 筛选 -->
+            <div class="filter-row">
+              <div class="chip active">全部 24</div>
+              <div class="chip">上衣 8</div>
+              <div class="chip">外套 4</div>
+              <div class="chip">裤装 6</div>
+              <div class="chip">裙装 3</div>
+              <div class="chip">鞋履 3</div>
+            </div>
+
+            <!-- 衣服网格 -->
+            <div class="clothes-grid">
+              <div class="cloth-card" onclick="void(0)">
+                <div class="cloth-thumb" style="background:linear-gradient(145deg,#f5f0e8,#ede8dc)">
+                  👕
+                  <span class="cloth-badge">春秋</span>
+                </div>
+                <div class="cloth-info">
+                  <div class="cloth-name">米白衬衫</div>
+                  <div class="cloth-sub">通勤 · 米白色</div>
+                </div>
+              </div>
+              <div class="cloth-card" onclick="void(0)">
+                <div class="cloth-thumb" style="background:linear-gradient(145deg,#c8d8f0,#a8c0e0)">
+                  👕
+                  <span class="cloth-badge">四季</span>
+                </div>
+                <div class="cloth-info">
+                  <div class="cloth-name">浅蓝T恤</div>
+                  <div class="cloth-sub">休闲 · 浅蓝色</div>
+                </div>
+              </div>
+              <div class="cloth-card" onclick="void(0)">
+                <div class="cloth-thumb" style="background:linear-gradient(145deg,#d0c8b8,#bdb4a0)">
+                  🧥
+                  <span class="cloth-badge">秋冬</span>
+                </div>
+                <div class="cloth-info">
+                  <div class="cloth-name">卡其风衣</div>
+                  <div class="cloth-sub">通勤 · 卡其色</div>
+                </div>
+              </div>
+              <div class="cloth-card" onclick="void(0)">
+                <div class="cloth-thumb" style="background:linear-gradient(145deg,#2c3e50,#1a252f)">
+                  👖
+                  <span class="cloth-badge">四季</span>
+                </div>
+                <div class="cloth-info">
+                  <div class="cloth-name">深蓝牛仔裤</div>
+                  <div class="cloth-sub">休闲 · 深蓝色</div>
+                </div>
+              </div>
+              <div class="cloth-card" onclick="void(0)">
+                <div class="cloth-thumb" style="background:linear-gradient(145deg,#e8e0f0,#d8ceec)">
+                  👗
+                  <span class="cloth-badge">春夏</span>
+                </div>
+                <div class="cloth-info">
+                  <div class="cloth-name">紫色碎花裙</div>
+                  <div class="cloth-sub">休闲 · 紫色</div>
+                </div>
+              </div>
+              <div class="cloth-add" onclick="showPage('add', document.querySelectorAll('.page-nav button')[2])">
+                <div class="cloth-add-icon">＋</div>
+                <span>添加衣服</span>
+              </div>
+            </div>
+          </div>
+          <div class="tab-bar">
+            <div class="tab-item" onclick="showPage('home', document.querySelectorAll('.page-nav button')[0])">
+              <div class="tab-icon"><svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></div>
+              <div class="tab-label">首页</div>
+            </div>
+            <div class="tab-item active" onclick="showPage('wardrobe', document.querySelectorAll('.page-nav button')[1])">
+              <div class="tab-icon"><svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+              <div class="tab-label" style="color:var(--green)">衣柜</div>
+            </div>
+            <div class="tab-item" onclick="showPage('history', document.querySelectorAll('.page-nav button')[3])">
+              <div class="tab-icon"><svg viewBox="0 0 24 24" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+              <div class="tab-label">历史</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ③ 添加衣服 -->
+        <div class="page-screen" id="page-add">
+          <div class="status-bar"><span>9:41</span><div class="status-icons"><i>●●● 🔋</i></div></div>
+          <div class="nav-bar">
+            <div class="nav-back" onclick="showPage('wardrobe', document.querySelectorAll('.page-nav button')[1])">‹ 返回</div>
+            <div class="nav-title">添加衣服</div>
+            <div class="nav-right"><span style="font-size:13px;color:var(--text-tertiary)">清空</span></div>
+          </div>
+          <div class="page-body">
+
+            <!-- 上传 -->
+            <div class="upload-zone">
+              <div class="upload-icon">📷</div>
+              <span>拍照或从相册选择</span>
+              <small>支持 JPG / PNG，建议纯色背景</small>
+            </div>
+
+            <!-- 类型 -->
+            <div class="form-group">
+              <div class="form-label">衣服类型</div>
+              <select class="form-select">
+                <option>请选择类型</option>
+                <option>上衣（T恤/衬衫）</option>
+                <option>外套（夹克/风衣/毛衣）</option>
+                <option>裤装（休闲裤/牛仔裤）</option>
+                <option>裙装（短裙/长裙/连衣裙）</option>
+                <option>鞋履</option>
+                <option>配饰</option>
+              </select>
+            </div>
+
+            <!-- 颜色 -->
+            <div class="form-group">
+              <div class="form-label">主色调</div>
+              <div class="color-palette">
+                <div class="color-dot active" style="background:#1a1a1a"></div>
+                <div class="color-dot" style="background:#ffffff;border:1.5px solid #ddd"></div>
+                <div class="color-dot" style="background:#f5f0e8;border:1.5px solid #ddd"></div>
+                <div class="color-dot" style="background:#e85d5d"></div>
+                <div class="color-dot" style="background:#4a90d9"></div>
+                <div class="color-dot" style="background:#1aab7a"></div>
+                <div class="color-dot" style="background:#f5a623"></div>
+                <div class="color-dot" style="background:#9b59b6"></div>
+                <div class="color-dot" style="background:#795548"></div>
+                <div class="color-dot" style="background:#78909c"></div>
+              </div>
+            </div>
+
+            <!-- 风格 -->
+            <div class="form-group">
+              <div class="form-label">穿搭风格</div>
+              <div class="multi-chips">
+                <div class="multi-chip active">休闲</div>
+                <div class="multi-chip">通勤</div>
+                <div class="multi-chip">运动</div>
+                <div class="multi-chip">正式</div>
+                <div class="multi-chip">复古</div>
+                <div class="multi-chip">街头</div>
+                <div class="multi-chip">法式</div>
+                <div class="multi-chip">日系</div>
+              </div>
+            </div>
+
+            <!-- 季节 -->
+            <div class="form-group">
+              <div class="form-label">适合季节（可多选）</div>
+              <div class="multi-chips">
+                <div class="multi-chip active">春</div>
+                <div class="multi-chip">夏</div>
+                <div class="multi-chip active">秋</div>
+                <div class="multi-chip">冬</div>
+                <div class="multi-chip">四季</div>
+              </div>
+            </div>
+
+            <!-- 备注 -->
+            <div class="form-group">
+              <div class="form-label">备注（选填）</div>
+              <textarea class="form-select" rows="2" placeholder="如：特别场合专用、不搭配X件..." style="resize:none;font-family:'Noto Sans SC',sans-serif;font-size:13px;"></textarea>
+            </div>
+
+            <button class="btn-primary" onclick="showPage('wardrobe', document.querySelectorAll('.page-nav button')[1])">✓ 保存到衣柜</button>
+
+          </div>
+        </div>
+
+        <!-- ④ 历史穿搭 -->
+        <div class="page-screen" id="page-history">
+          <div class="status-bar"><span>9:41</span><div class="status-icons"><i>●●● 🔋</i></div></div>
+          <div class="nav-bar">
+            <div style="width:60px"></div>
+            <div class="nav-title">历史穿搭</div>
+            <div class="nav-right"><span style="font-size:13px;color:var(--green)">筛选</span></div>
+          </div>
+          <div class="page-body">
+
+            <!-- 日历 -->
+            <div class="card calendar-card">
+              <div class="cal-header">
+                <div class="cal-nav"><span>‹</span></div>
+                <h3>2024年3月</h3>
+                <div class="cal-nav"><span>›</span></div>
+              </div>
+              <div class="cal-grid">
+                <div class="cal-dow">一</div><div class="cal-dow">二</div><div class="cal-dow">三</div>
+                <div class="cal-dow">四</div><div class="cal-dow">五</div><div class="cal-dow">六</div><div class="cal-dow">日</div>
+                <div class="cal-day dimmed"></div><div class="cal-day dimmed"></div><div class="cal-day dimmed"></div>
+                <div class="cal-day has-record">1</div><div class="cal-day">2</div><div class="cal-day">3</div><div class="cal-day">4</div>
+                <div class="cal-day has-record">5</div><div class="cal-day">6</div><div class="cal-day has-record">7</div>
+                <div class="cal-day has-record">8</div><div class="cal-day">9</div><div class="cal-day has-record">10</div><div class="cal-day">11</div>
+                <div class="cal-day has-record">12</div><div class="cal-day has-record">13</div><div class="cal-day">14</div>
+                <div class="cal-day has-record">15</div><div class="cal-day has-record">16</div>
+                <div class="cal-day today has-record" onclick="showPage('detail', document.querySelectorAll('.page-nav button')[4])">17</div>
+                <div class="cal-day">18</div>
+                <div class="cal-day dimmed">19</div><div class="cal-day dimmed">20</div><div class="cal-day dimmed">21</div>
+              </div>
+            </div>
+
+            <!-- 列表 -->
+            <div class="section-hd">
+              <h3>穿搭记录</h3>
+              <a href="#">共 16 条</a>
+            </div>
+            <div class="history-list">
+              <div class="history-item" onclick="showPage('detail', document.querySelectorAll('.page-nav button')[4])">
+                <div class="history-thumb" style="background:linear-gradient(145deg,#f5f0e8,#ede8dc)">👔</div>
+                <div class="history-info">
+                  <div class="history-date">3月17日（今天）</div>
+                  <div class="history-pieces">
+                    <span class="history-piece">米白衬衫</span>
+                    <span class="history-piece">深蓝牛仔裤</span>
+                    <span class="history-piece">棕色鞋</span>
+                  </div>
+                  <div class="history-weather">⛅ 多云 18° / 10°</div>
+                </div>
+                <div class="history-arrow">›</div>
+              </div>
+              <div class="history-item" onclick="showPage('detail', document.querySelectorAll('.page-nav button')[4])">
+                <div class="history-thumb" style="background:linear-gradient(145deg,#d0c8b8,#bdb4a0)">🧥</div>
+                <div class="history-info">
+                  <div class="history-date">3月16日</div>
+                  <div class="history-pieces">
+                    <span class="history-piece">卡其风衣</span>
+                    <span class="history-piece">黑色打底</span>
+                    <span class="history-piece">白色球鞋</span>
+                  </div>
+                  <div class="history-weather">🌧 小雨 12° / 8°</div>
+                </div>
+                <div class="history-arrow">›</div>
+              </div>
+              <div class="history-item" onclick="showPage('detail', document.querySelectorAll('.page-nav button')[4])">
+                <div class="history-thumb" style="background:linear-gradient(145deg,#e8e0f0,#d8ceec)">👗</div>
+                <div class="history-info">
+                  <div class="history-date">3月15日</div>
+                  <div class="history-pieces">
+                    <span class="history-piece">紫色碎花裙</span>
+                    <span class="history-piece">白色针织</span>
+                  </div>
+                  <div class="history-weather">☀️ 晴朗 20° / 12°</div>
+                </div>
+                <div class="history-arrow">›</div>
+              </div>
+              <div class="history-item" onclick="showPage('detail', document.querySelectorAll('.page-nav button')[4])">
+                <div class="history-thumb" style="background:linear-gradient(145deg,#2c3e50,#1a252f)">👖</div>
+                <div class="history-info">
+                  <div class="history-date">3月13日</div>
+                  <div class="history-pieces">
+                    <span class="history-piece">黑色卫衣</span>
+                    <span class="history-piece">深蓝牛仔</span>
+                  </div>
+                  <div class="history-weather">🌤 晴间多云 15° / 6°</div>
+                </div>
+                <div class="history-arrow">›</div>
+              </div>
+            </div>
+
+          </div>
+          <div class="tab-bar">
+            <div class="tab-item" onclick="showPage('home', document.querySelectorAll('.page-nav button')[0])">
+              <div class="tab-icon"><svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></div>
+              <div class="tab-label">首页</div>
+            </div>
+            <div class="tab-item" onclick="showPage('wardrobe', document.querySelectorAll('.page-nav button')[1])">
+              <div class="tab-icon"><svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+              <div class="tab-label">衣柜</div>
+            </div>
+            <div class="tab-item active" onclick="showPage('history', document.querySelectorAll('.page-nav button')[3])">
+              <div class="tab-icon"><svg viewBox="0 0 24 24" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+              <div class="tab-label" style="color:var(--green)">历史</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ⑤ 穿搭详情 -->
+        <div class="page-screen" id="page-detail">
+          <div class="status-bar"><span>9:41</span><div class="status-icons"><i>●●● 🔋</i></div></div>
+          <div class="nav-bar">
+            <div class="nav-back" onclick="showPage('history', document.querySelectorAll('.page-nav button')[3])">‹ 返回</div>
+            <div class="nav-title">穿搭详情</div>
+            <div class="nav-right"><span style="font-size:18px;cursor:pointer">↗</span></div>
+          </div>
+          <div class="page-body">
+
+            <!-- 主视觉 -->
+            <div class="detail-hero">
+              <div class="detail-figure">
+                <div class="detail-top">👕</div>
+                <div class="detail-bottom">👖</div>
+              </div>
+              <div class="detail-weather-badge">⛅ 18° 多云</div>
+            </div>
+
+            <!-- 基本信息 -->
+            <div class="card">
+              <div style="font-size:17px;font-weight:600;color:var(--text-primary);margin-bottom:4px">3月17日 今日穿搭</div>
+              <div style="font-size:13px;color:var(--text-tertiary);margin-bottom:12px">由 AI 生成 · 已穿搭</div>
+              <div class="outfit-tags">
+                <span class="tag tag-green">春日清爽</span>
+                <span class="tag tag-amber">通勤风</span>
+                <span class="tag tag-blue">适合18°</span>
+              </div>
+            </div>
+
+            <!-- 单品详情 -->
+            <div class="card">
+              <div class="section-hd" style="margin-bottom:12px">
+                <h3>搭配单品</h3>
+                <span style="font-size:12px;color:var(--text-tertiary)">共3件</span>
+              </div>
+              <div class="items-list">
+                <div class="item-row">
+                  <div class="item-swatch" style="background:linear-gradient(145deg,#f5f0e8,#ede8dc);border:1px solid #eee"></div>
+                  <div class="item-detail">
+                    <div class="in">米白色轻薄衬衫</div>
+                    <div class="is">上衣 · 通勤 · 春秋</div>
+                  </div>
+                  <span style="font-size:11px;color:var(--green)">衣柜</span>
+                </div>
+                <div class="item-row">
+                  <div class="item-swatch" style="background:#2c3e50"></div>
+                  <div class="item-detail">
+                    <div class="in">深蓝直筒牛仔裤</div>
+                    <div class="is">裤装 · 休闲 · 四季</div>
+                  </div>
+                  <span style="font-size:11px;color:var(--green)">衣柜</span>
+                </div>
+                <div class="item-row">
+                  <div class="item-swatch" style="background:#8B7355"></div>
+                  <div class="item-detail">
+                    <div class="in">棕色小白鞋</div>
+                    <div class="is">鞋履 · 百搭 · 四季</div>
+                  </div>
+                  <span style="font-size:11px;color:var(--green)">衣柜</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 当日天气 -->
+            <div class="card">
+              <div class="section-hd" style="margin-bottom:12px"><h3>当日天气</h3></div>
+              <div class="stat-row">
+                <div class="stat-box"><div class="sv">18°</div><div class="sl">实时温度</div></div>
+                <div class="stat-box"><div class="sv">55%</div><div class="sl">湿度</div></div>
+                <div class="stat-box"><div class="sv">3级</div><div class="sl">北风</div></div>
+              </div>
+            </div>
+
+            <!-- AI 评价 -->
+            <div class="card" style="background:var(--green-light)">
+              <div style="font-size:12px;font-weight:600;color:var(--green-mid);margin-bottom:6px">🤖 AI 穿搭点评</div>
+              <div style="font-size:13px;color:#2d7a5f;line-height:1.7">
+                今日搭配整体清爽自然，米白衬衫与深蓝牛仔形成经典色彩对比，棕色鞋增添温暖感。适合18°多云天气，建议包中备薄外套应对晚间降温。整体评分：9/10 ⭐
+              </div>
+            </div>
+
+            <!-- 操作 -->
+            <button class="btn-secondary">🔄 再穿一次</button>
+
+          </div>
+        </div>
+
+      </div><!-- /phone-screen -->
+    </div><!-- /phone -->
+
+    <div class="page-indicator">
+      <span class="dot active" id="dot-home"></span>
+      <span class="dot" id="dot-wardrobe"></span>
+      <span class="dot" id="dot-add"></span>
+      <span class="dot" id="dot-history"></span>
+      <span class="dot" id="dot-detail"></span>
+    </div>
+
+  </div><!-- /phone-wrapper -->
+</div><!-- /phone-stage -->
+
+<script>
+  const pages = ['home','wardrobe','add','history','detail'];
+
+  function showPage(name, btn) {
+    pages.forEach(p => {
+      const el = document.getElementById('page-' + p);
+      el.classList.remove('active');
+      const dot = document.getElementById('dot-' + p);
+      if (dot) dot.classList.remove('active');
+    });
+    document.getElementById('page-' + name).classList.add('active');
+    const dot = document.getElementById('dot-' + name);
+    if (dot) dot.classList.add('active');
+
+    document.querySelectorAll('.page-nav button').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+  }
+
+  // Color dot toggle
+  document.querySelectorAll('.color-dot').forEach(dot => {
+    dot.addEventListener('click', function() {
+      document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+
+  // Multi chip toggle
+  document.querySelectorAll('.multi-chip').forEach(chip => {
+    chip.addEventListener('click', function() {
+      this.classList.toggle('active');
+    });
+  });
+
+  // Filter chip single select
+  document.querySelectorAll('.filter-row .chip').forEach(chip => {
+    chip.addEventListener('click', function() {
+      document.querySelectorAll('.filter-row .chip').forEach(c => c.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>
